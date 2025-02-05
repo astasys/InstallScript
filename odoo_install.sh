@@ -102,9 +102,10 @@ sudo apt-get install git python3-cffi build-essential wget python3-dev python3-v
 
 echo -e "\n---- Install python packages/requirements ----"
 python3 -m venv /$OE_USER/venv
+sudo su $OE_USER
 source /$OE_USER/venv/bin/activate
-cd /$OE_USER/venv/bin
-sudo -H pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
+pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
+exit
 deactivate
 echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
 sudo apt-get install nodejs npm -y
