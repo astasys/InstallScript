@@ -93,6 +93,11 @@ fi
 echo -e "\n---- Creating the ODOO PostgreSQL User  ----"
 sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 
+echo -e "\n---- Create ODOO system user ----"
+sudo adduser --system --quiet --shell=/bin/bash --home=$OE_HOME --gecos 'ODOO' --group $OE_USER
+#The user should also be added to the sudo'ers group.
+sudo adduser $OE_USER sudo
+
 #--------------------------------------------------
 # Install Dependencies
 #--------------------------------------------------
@@ -137,10 +142,7 @@ else
   echo "Wkhtmltopdf isn't installed due to the choice of the user!"
 fi
 
-echo -e "\n---- Create ODOO system user ----"
-sudo adduser --system --quiet --shell=/bin/bash --home=$OE_HOME --gecos 'ODOO' --group $OE_USER
-#The user should also be added to the sudo'ers group.
-sudo adduser $OE_USER sudo
+
 
 echo -e "\n---- Create Log directory ----"
 sudo mkdir /var/log/$OE_USER
@@ -178,15 +180,14 @@ if [ $IS_ENTERPRISE = "True" ]; then
     sudo npm install -g less-plugin-clean-css
 fi
 
+echo -e "\n---- Setting permissions on home folder ----"
+sudo chown -R $OE_USER:$OE_USER $OE_HOME/*
+
 echo -e "\n---- Create custom module directory ----"
 sudo su $OE_USER -c "mkdir $OE_HOME/custom"
 sudo su $OE_USER -c "mkdir $OE_HOME/custom/addons"
 
-echo -e "\n---- Setting permissions on home folder ----"
-sudo chown -R $OE_USER:$OE_USER $OE_HOME/*
-
 echo -e "* Create server config file"
-
 
 sudo touch /etc/${OE_CONFIG}.conf
 echo -e "* Creating server config file"
