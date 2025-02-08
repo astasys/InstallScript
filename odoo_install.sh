@@ -105,7 +105,6 @@ python3 -m venv /$OE_USER/venv
 sudo su $OE_USER
 source /$OE_USER/venv/bin/activate
 pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
-exit
 deactivate
 echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
 sudo apt-get install nodejs npm -y
