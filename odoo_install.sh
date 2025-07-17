@@ -237,8 +237,11 @@ cat <<EOF > ~/$OE_CONFIG
 # Description: ODOO Business Applications
 ### END INIT INFO
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-VENV_PATH=$OE_USER/venv
-DAEMON="$VENV_PATH/bin/python $OE_HOME_EXT/odoo-bin"
+
+# Virtual environment path
+VENV_PATH=\$OE_USER/venv
+DAEMON="\$VENV_PATH/bin/python"
+DAEMON_ARGS="\$OE_HOME_EXT/odoo-bin"
 NAME=$OE_CONFIG
 DESC=$OE_CONFIG
 # Specify the user name (Default: odoo).
@@ -247,10 +250,9 @@ USER=$OE_USER
 CONFIGFILE="/etc/${OE_CONFIG}.conf"
 # pidfile
 PIDFILE=/var/run/\${NAME}.pid
-# Virtual environment path
-VENV_PATH=$OE_USER/venv
+
 # Additional options that are passed to the Daemon.
-DAEMON_OPTS="-c \$CONFIGFILE"
+DAEMON_OPTS="\$DAEMON_ARGS -c \$CONFIGFILE"
 [ -x \$DAEMON ] || exit 0
 [ -f \$CONFIGFILE ] || exit 0
 checkpid() {
