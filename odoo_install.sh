@@ -109,7 +109,7 @@ echo -e "\n---- Install python packages/requirements ----"
 python3 -m venv /$OE_USER/venv
 source /$OE_USER/venv/bin/activate
 pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
-#deactivate
+deactivate
 echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
 sudo apt-get install nodejs npm -y
 sudo npm install -g rtlcss
@@ -156,7 +156,9 @@ sudo git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $
 
 if [ $IS_ENTERPRISE = "True" ]; then
     # Odoo Enterprise install!
-    sudo pip3 install psycopg2-binary pdfminer.six
+    source /$OE_USER/venv/bin/activate
+    pip3 install psycopg2-binary pdfminer.six
+    deactivate
     echo -e "\n--- Create symlink for node"
     sudo ln -s /usr/bin/nodejs /usr/bin/node
     sudo su $OE_USER -c "mkdir $OE_HOME/enterprise"
@@ -175,7 +177,9 @@ if [ $IS_ENTERPRISE = "True" ]; then
 
     echo -e "\n---- Added Enterprise code under $OE_HOME/enterprise/addons ----"
     echo -e "\n---- Installing Enterprise specific libraries ----"
-    sudo -H pip3 install num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL
+    source /$OE_USER/venv/bin/activate
+    pip3 install num2words ofxparse dbfread ebaysdk firebase_admin pyOpenSSL
+    deactivate
     sudo npm install -g less
     sudo npm install -g less-plugin-clean-css
 fi
