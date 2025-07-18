@@ -18,8 +18,6 @@ OE_USER="odoo"
 OE_HOME="/$OE_USER"
 OE_HOME_EXT="/$OE_USER/${OE_USER}-server"
 # The default port where this Odoo instance will run under (provided you use the command -c in the terminal)
-# Set to true if you want to install it, false if you don't need it or have it already installed.
-INSTALL_WKHTMLTOPDF="True"
 # Set the default Odoo port (you still have to use -c /etc/odoo-server.conf for example to use this.)
 OE_PORT="8069"
 # Choose the Odoo version which you want to install. For example: 16.0, 15.0, 14.0 or saas-22. When using 'master' the master version will be installed.
@@ -51,16 +49,10 @@ ADMIN_EMAIL="odoo@example.com"
 ## https://github.com/odoo/odoo/wiki/Wkhtmltopdf ):
 ## https://www.odoo.com/documentation/16.0/administration/install.html
 
-# Check if the operating system is Ubuntu 24.04
-if [[ $(lsb_release -r -s) == "24.04" ]]; then
-    WKHTMLTOX_X64="https://packages.ubuntu.com/jammy/wkhtmltopdf"
-    WKHTMLTOX_X32="https://packages.ubuntu.com/jammy/wkhtmltopdf"
-    #No Same link works for both 64 and 32-bit on Ubuntu 24.04
-else
-    # For older versions of Ubuntu
-    WKHTMLTOX_X64="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.$(lsb_release -c -s)_amd64.deb"
-    WKHTMLTOX_X32="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.$(lsb_release -c -s)_i386.deb"
-fi
+
+WKHTMLTOX_X64="https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.$(lsb_release -c -s)_amd64.deb"
+WKHTMLTOX_X32="https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.$(lsb_release -c -s)_i386.deb"
+
 
 #--------------------------------------------------
 # Update Server
@@ -117,32 +109,23 @@ sudo npm install -g rtlcss
 #--------------------------------------------------
 # Install Wkhtmltopdf if needed
 #--------------------------------------------------
-if [ $INSTALL_WKHTMLTOPDF = "True" ]; then
-  echo -e "\n---- Install wkhtml and place shortcuts on correct place for ODOO 13 ----"
-  #pick up correct one from x64 & x32 versions:
-  if [ "`getconf LONG_BIT`" == "64" ];then
-      _url=$WKHTMLTOX_X64
-  else
-      _url=$WKHTMLTOX_X32
-  fi
-  sudo wget $_url
-  
-
-  if [[ $(lsb_release -r -s) == "24.04" ]]; then
-    # Ubuntu 24.04 LTS
-    sudo apt install wkhtmltopdf -y
-  else
-      # For older versions of Ubuntu
-    sudo gdebi --n `basename $_url`
-  fi
-  
-  sudo ln -s /usr/local/bin/wkhtmltopdf /usr/bin
-  sudo ln -s /usr/local/bin/wkhtmltoimage /usr/bin
+echo -e "\n---- Install wkhtml and place shortcuts on correct place for ODOO 13 ----"
+#pick up correct one from x64 & x32 versions:
+if [ "`getconf LONG_BIT`" == "64" ];then
+    _url=$WKHTMLTOX_X64
 else
-  echo "Wkhtmltopdf isn't installed due to the choice of the user!"
+    _url=$WKHTMLTOX_X32
 fi
+wget $_url
+sudo gdebi --n `basename $_url`  
+sudo ln -s /usr/local/bin/wkhtmltopdf /usr/bin
+sudo ln -s /usr/local/bin/wkhtmltoimage /usr/bin
 
-
+#--------------------------------------------------
+# Install Chinese fonts
+#--------------------------------------------------
+echo -e "\n---- Install Chinese fonts ----"
+sudo apt-get install fonts-wqy-zenhei fonts-wqy-microhei fonts-arphic-ukai fonts-arphic-uming
 
 echo -e "\n---- Create Log directory ----"
 sudo mkdir /var/log/$OE_USER
@@ -156,6 +139,7 @@ sudo git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $
 
 if [ $IS_ENTERPRISE = "True" ]; then
     # Odoo Enterprise install!
+    echo -e "\n---- Install python packages/requirements for Odoo enterprise edition----"
     source /$OE_USER/venv/bin/activate
     pip3 install psycopg2-binary pdfminer.six
     deactivate
