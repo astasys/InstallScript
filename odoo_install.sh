@@ -66,6 +66,13 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install libpq-dev
 
+
+#--------------------------------------------------
+# Set Timezone
+#--------------------------------------------------
+echo -e "\n---- Set timezone Asia/Hong_Kong ----"
+
+timedatectl set-timezone Asia/Hong_Kong
 #--------------------------------------------------
 # Install PostgreSQL Server
 #--------------------------------------------------
@@ -193,7 +200,7 @@ fi
 sudo su root -c "printf 'logfile = /var/log/${OE_USER}/${OE_CONFIG}.log\n' >> /etc/${OE_CONFIG}.conf"
 
 if [ $IS_ENTERPRISE = "True" ]; then
-    sudo su root -c "printf 'addons_path=${OE_HOME}/enterprise/addons,${OE_HOME_EXT}/addons\n' >> /etc/${OE_CONFIG}.conf"
+    sudo su root -c "printf 'addons_path=${OE_HOME}/enterprise/addons,${OE_HOME_EXT}/addons,${OE_HOME}/custom/addons\n' >> /etc/${OE_CONFIG}.conf"
 else
     sudo su root -c "printf 'addons_path=${OE_HOME_EXT}/addons,${OE_HOME}/custom/addons\n' >> /etc/${OE_CONFIG}.conf"
 fi
@@ -227,9 +234,9 @@ cat <<EOF > ~/$OE_CONFIG
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
 
 # Virtual environment path
-VENV_PATH=\$OE_USER/venv
-DAEMON="\$VENV_PATH/bin/python"
-DAEMON_ARGS="\$OE_HOME_EXT/odoo-bin"
+VENV_PATH=$OE_USER/venv
+DAEMON="${VENV_PATH}/bin/python"
+DAEMON_ARGS="${OE_HOME_EXT}/odoo-bin"
 NAME=$OE_CONFIG
 DESC=$OE_CONFIG
 # Specify the user name (Default: odoo).
