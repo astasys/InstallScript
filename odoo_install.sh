@@ -42,6 +42,9 @@ LONGPOLLING_PORT="8072"
 ENABLE_SSL="True"
 # Provide Email to register ssl certificate
 ADMIN_EMAIL="odoo@example.com"
+# Worker Count for Odoo, this is the number of workers that will be started by default
+WORKER_COUNT=4
+
 ##
 ###  WKHTMLTOPDF download links
 ## === Ubuntu Trusty x64 & x32 === (for other distributions please replace these two links,
@@ -202,6 +205,14 @@ else
     sudo su root -c "printf 'xmlrpc_port = ${OE_PORT}\n' >> /etc/${OE_CONFIG}.conf"
 fi
 sudo su root -c "printf 'logfile = /var/log/${OE_USER}/${OE_CONFIG}.log\n' >> /etc/${OE_CONFIG}.conf"
+
+if [ $LONGPOLLING_PORT ]; then
+    sudo su root -c "printf 'longpolling_port = ${LONGPOLLING_PORT}\n' >> /etc/${OE_CONFIG}.conf"
+fi
+
+if [ $WORKER_COUNT ]; then
+    sudo su root -c "printf 'workers = ${WORKER_COUNT}\n' >> /etc/${OE_CONFIG}.conf"
+fi
 
 if [ $IS_ENTERPRISE = "True" ]; then
     sudo su root -c "printf 'addons_path=${OE_HOME}/enterprise/addons,${OE_HOME_EXT}/addons,${OE_HOME}/custom/addons\n' >> /etc/${OE_CONFIG}.conf"
