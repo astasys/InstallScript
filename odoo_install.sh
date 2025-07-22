@@ -249,8 +249,8 @@ cat <<EOF > ~/$OE_CONFIG
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
 
 # Virtual environment path
-VENV_PATH=/$OE_USER/venv
-DAEMON="/$VENV_PATH/bin/python"
+VENV_PATH="/$OE_USER/venv"
+DAEMON="$VENV_PATH/bin/python"
 DAEMON_ARGS="${OE_HOME_EXT}/odoo-bin"
 NAME=$OE_CONFIG
 DESC=$OE_CONFIG
