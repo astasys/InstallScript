@@ -53,6 +53,8 @@ ADMIN_EMAIL="odoo@example.com"
 WORKER_COUNT=4
 # Server timezone
 TIMEZONE="Asia/Hong_Kong"
+# The Odoo log is rotated every day, this is how many days of log files are kept
+LOG_RETENTION_DAYS="30"
 # wkhtmltopdf build with patched Qt, the version recommended by Odoo (needed for headers and footers)
 WKHTMLTOX_VERSION="0.12.6.1-3"
 
@@ -223,6 +225,28 @@ apt_get install fonts-wqy-zenhei fonts-wqy-microhei fonts-arphic-ukai fonts-arph
 echo -e "\n---- Create Log directory ----"
 sudo mkdir -p /var/log/$OE_USER
 sudo chown $OE_USER:$OE_USER /var/log/$OE_USER
+
+echo -e "\n---- Rotate the Odoo log daily, keep $LOG_RETENTION_DAYS days ----"
+apt_get install logrotate
+# Odoo has no log rotation of its own. It writes its log through a WatchedFileHandler, which
+# reopens the file by itself once logrotate has renamed it. So a plain rename + create is enough:
+# no copytruncate (which can lose lines) and no Odoo restart.
+# dateyesterday: logrotate runs shortly after midnight, so the file it rotates holds yesterday's log.
+# delaycompress: a worker may still write a few lines to the renamed file before it reopens.
+cat <<EOF | sudo tee /etc/logrotate.d/${OE_CONFIG} > /dev/null
+/var/log/${OE_USER}/*.log {
+    daily
+    rotate ${LOG_RETENTION_DAYS}
+    dateext
+    dateyesterday
+    missingok
+    notifempty
+    compress
+    delaycompress
+    su ${OE_USER} ${OE_USER}
+    create 640 ${OE_USER} ${OE_USER}
+}
+EOF
 
 #--------------------------------------------------
 # Install ODOO
@@ -500,6 +524,7 @@ echo "Odoo listens on: $OE_HTTP_INTERFACE (127.0.0.1 = only reachable through Ng
 echo "User service: $OE_USER"
 echo "Configuraton file location: /etc/${OE_CONFIG}.conf"
 echo "Logfile location: /var/log/$OE_USER"
+echo "Log rotation: daily, $LOG_RETENTION_DAYS days kept (/etc/logrotate.d/$OE_CONFIG)"
 echo "User PostgreSQL: $OE_USER"
 echo "Code location: $OE_HOME_EXT"
 echo "Python virtualenv: $OE_VENV"

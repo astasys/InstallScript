@@ -28,6 +28,7 @@ There are a few things you can configure, this is the most used list:<br/>
 ```GEVENT_PORT``` is the port of the Odoo gevent (websocket) worker, 8072 by default. Odoo 19 no longer recognises the old ```longpolling_port``` option.<br/>
 ```WORKER_COUNT``` is the number of Odoo workers written to the config file. Keep it above 0 when Nginx is used.<br/>
 ```TIMEZONE``` is the server timezone, ```Asia/Hong_Kong``` by default.<br/>
+```LOG_RETENTION_DAYS``` is how many days of Odoo log files are kept, ```30``` by default. The log is rotated every day.<br/>
 ```WEBSITE_NAME``` Set the website name here for nginx configuration<br/>
 ```ENABLE_SSL``` Set this to ```True``` to install [certbot](https://github.com/certbot/certbot) and configure nginx with https using a free Let's Encrypted certificate<br/>
 ```ADMIN_EMAIL``` Email is needed to register for Let's Encrypt registration. Replace the default placeholder with an email of your organisation.<br/>
@@ -50,6 +51,7 @@ sudo ./odoo_install.sh
 - The PostgreSQL role is created with ```CREATEDB``` but without ```SUPERUSER```, and the Odoo system user is not added to the sudo group.
 - wkhtmltopdf 0.12.6.1-3 (patched Qt) is installed from the [wkhtmltopdf packaging releases](https://github.com/wkhtmltopdf/packaging/releases/tag/0.12.6.1-3), for amd64 and arm64. There is no Ubuntu 24.04 build, the jammy build is used.
 - Chinese fonts are installed so that PDF reports render Chinese text.
+- The Odoo log in ```/var/log/odoo``` is rotated every day by logrotate (```/etc/logrotate.d/odoo-server```): one file per day named after the day it covers, for example ```odoo-server.log-20260919```, 30 days kept, older files gzip-compressed (read them with ```zless``` or ```zgrep```). Odoo does not need a restart when the log is rotated.
 
 ## Testing the script
 The ```test_install``` folder contains a Docker setup that runs the script in a clean Ubuntu 24.04 container. See [test_install/README.md](test_install/README.md).
