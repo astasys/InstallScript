@@ -53,6 +53,79 @@ sudo ./odoo_install.sh
 - Chinese fonts are installed so that PDF reports render Chinese text.
 - The Odoo log in ```/var/log/odoo``` is rotated every day by logrotate (```/etc/logrotate.d/odoo-server```): one file per day named after the day it covers, for example ```odoo-server.log-20260919```, 30 days kept, older files gzip-compressed (read them with ```zless``` or ```zgrep```). Odoo does not need a restart when the log is rotated.
 
+## Versions
+The script targets **Ubuntu 24.04 LTS (Noble Numbat)** on amd64 or arm64.
+
+Some versions are fixed by the script, the others are whatever the package repositories provide on the day of the install, so patch versions move over time. The versions below were recorded from a clean install on 2026-09-20.
+
+| Component | Version installed | Source | Fixed by the script? |
+|---|---|---|---|
+| Operating system | Ubuntu 24.04 LTS | | Yes, this is the supported target |
+| Odoo | 19.0, latest commit of the branch | [odoo/odoo](https://github.com/odoo/odoo/tree/19.0) on GitHub | Branch fixed by ```OE_VERSION``` |
+| Python | 3.12.3 | Ubuntu repository | No. Ubuntu 24.04 stays on 3.12. Odoo 19 needs 3.10 or later |
+| pip | 24.0 | Ubuntu repository | No |
+| PostgreSQL server | 16.15 | [PostgreSQL apt repository](https://apt.postgresql.org) | Major version 16 fixed. Odoo 19 needs 13 or later |
+| pgvector, Enterprise only | 0.8.6 | PostgreSQL apt repository | No. Needs PostgreSQL 15 or later |
+| libpq, PostgreSQL client library | 18.6 | PostgreSQL apt repository | No. That repository always ships the newest libpq, which works with a version 16 server |
+| Nginx | 1.24.0 | Ubuntu repository | No |
+| wkhtmltopdf | 0.12.6.1-3 with patched Qt, jammy build | [wkhtmltopdf packaging](https://github.com/wkhtmltopdf/packaging/releases/tag/0.12.6.1-3) on GitHub | Yes, ```WKHTMLTOX_VERSION``` |
+| Node.js | 18.19.1 | Ubuntu repository | No |
+| npm | 9.2.0 | Ubuntu repository | No |
+| rtlcss | latest | npm registry | No |
+| Git | 2.43.0 | Ubuntu repository | No |
+| GCC, used to build Python packages | 13.2.0 | Ubuntu repository | No |
+| logrotate | 3.21.0 | Ubuntu repository | No |
+| Certbot, only with ```ENABLE_SSL``` | latest | snap | No |
+| Python packages | see below | PyPI | Yes, pinned by the Odoo ```requirements.txt``` |
+
+<details>
+<summary>System libraries and fonts</summary>
+
+| Package | Version |
+|---|---|
+| libpq-dev | 18.6 |
+| libxslt1-dev | 1.1.39 |
+| libzip-dev | 1.7.3 |
+| libldap2-dev | 2.6.10 |
+| libsasl2-dev | 2.1.28 |
+| libjpeg-dev | 8c |
+| libpng-dev | 1.6.43 |
+| libmagic1 | 5.45 |
+| node-less | 3.13.0 |
+| fonts-wqy-zenhei | 0.9.45 |
+| fonts-wqy-microhei | 0.2.0-beta |
+| fonts-arphic-ukai | 0.2.20080216.2 |
+| fonts-arphic-uming | 0.2.20080216.2 |
+
+</details>
+
+<details>
+<summary>Python packages in the virtual environment</summary>
+
+These are the versions the Odoo 19.0 ```requirements.txt``` pins for Python 3.12. ```pytz``` and ```lxml-html-clean``` are left unpinned by Odoo, and ```phonenumbers``` is added unpinned by this script, so those three follow PyPI.
+
+| Package | Version | Package | Version | Package | Version |
+|---|---|---|---|---|---|
+| asn1crypto | 1.5.1 | libsass | 0.22.0 | python-dateutil | 2.8.2 |
+| Babel | 2.10.3 | lxml | 5.2.1 | python-ldap | 3.4.4 |
+| cbor2 | 5.6.2 | lxml-html-clean | 0.4.4 | python-magic | 0.4.27 |
+| chardet | 5.2.0 | MarkupSafe | 2.1.5 | python-stdnum | 1.19 |
+| cryptography | 42.0.8 | num2words | 0.5.13 | pytz | 2026.3.post1 |
+| docutils | 0.20.1 | ofxparse | 0.21 | pyusb | 1.2.1 |
+| freezegun | 1.2.1 | openpyxl | 3.1.2 | qrcode | 7.4.2 |
+| geoip2 | 2.9.0 | passlib | 1.7.4 | reportlab | 4.1.0 |
+| gevent | 24.2.1 | phonenumbers | 9.0.39 | requests | 2.31.0 |
+| greenlet | 3.0.3 | Pillow | 10.2.0 | rjsmin | 1.2.0 |
+| idna | 3.6 | polib | 1.1.1 | urllib3 | 2.0.7 |
+| Jinja2 | 3.1.2 | psutil | 5.9.8 | vobject | 0.9.6.1 |
+| Werkzeug | 3.0.1 | psycopg2 | 2.9.9 | xlrd | 2.0.1 |
+| XlsxWriter | 3.1.9 | pyopenssl | 24.1.0 | xlwt | 1.3.0 |
+| zeep | 4.2.1 | PyPDF2 | 2.12.1 | pyserial | 3.5 |
+
+The Enterprise install adds ```pdfminer.six```, ```dbfread```, ```ebaysdk``` and ```firebase_admin```, unpinned.
+
+</details>
+
 ## Testing the script
 The ```test_install``` folder contains a Docker setup that runs the script in a clean Ubuntu 24.04 container. See [test_install/README.md](test_install/README.md).
 
