@@ -5,13 +5,13 @@ but goes a bit further and has been improved. This script will also give you the
 This script can be safely used in a multi-odoo code base server because the default Odoo port is changed BEFORE the Odoo is started.
 
 ## Installing Nginx
-If you set the parameter ```INSTALL_NGINX``` to ```True``` you should also configure workers. Without workers you will probably get connection loss issues. Look at [the deployment guide from Odoo](https://www.odoo.com/documentation/18.0/administration/install/deploy.html) on how to configure workers.
+```INSTALL_NGINX``` is ```True``` by default, so Odoo runs behind Nginx with ```proxy_mode``` enabled and the ```/websocket``` route proxied to the gevent port. This needs workers: keep ```WORKER_COUNT``` above 0, otherwise you will get connection loss issues. Look at [the deployment guide from Odoo](https://www.odoo.com/documentation/19.0/administration/on_premise/deploy.html) on how to size workers.
 
 ## Installation procedure
 
 ##### 1. Download the script:
 ```
-sudo wget https://raw.githubusercontent.com/astasys/InstallScript/18.0-ubuntu24.04/odoo_install.sh
+sudo wget https://raw.githubusercontent.com/astasys/InstallScript/19.0-ubuntu24.04/odoo_install.sh
 ```
 ##### 2. Modify the parameters as you wish.
 There are a few things you can configure, this is the most used list:<br/>
@@ -19,10 +19,15 @@ There are a few things you can configure, this is the most used list:<br/>
 ```GENERATE_RANDOM_PASSWORD``` if this is set to ```True``` the script will generate a random password, if set to ```False```we'll set the password that is configured in ```OE_SUPERADMIN```. By default the value is ```True``` and the script will generate a random and secure password.<br/>
 ```INSTALL_WKHTMLTOPDF``` set to ```False``` if you do not want to install Wkhtmltopdf, if you want to install it you should set it to ```True```.<br/>
 ```OE_PORT``` is the port where Odoo should run on, for example 8069.<br/>
-```OE_VERSION``` is the Odoo version to install, for example ```18.0``` for Odoo V17.<br/>
-```IS_ENTERPRISE``` will install the Enterprise version on top of ```18.0``` if you set it to ```True```, set it to ```False``` if you want the community version of Odoo 17.<br/>
+```OE_VERSION``` is the Odoo version to install, for example ```19.0``` for Odoo V19.<br/>
+```IS_ENTERPRISE``` will install the Enterprise version on top of ```19.0``` if you set it to ```True```, set it to ```False``` if you want the community version of Odoo 19. The Enterprise install also adds the ```pgvector``` PostgreSQL extension, which the Odoo 19 AI features need.<br/>
+```OE_ENTERPRISE_REPO``` is the Git repository the Enterprise code is cloned from. You need read access to it.<br/>
+```INSTALL_POSTGRESQL_SIXTEEN``` installs PostgreSQL 16 from the official PostgreSQL apt repository when ```True```, otherwise the distribution default is used.<br/>
 ```OE_SUPERADMIN``` is the master password for this Odoo installation.<br/>
-```INSTALL_NGINX``` is set to ```False``` by default. Set this to ```True``` if you want to install Nginx.<br/>
+```INSTALL_NGINX``` is set to ```True``` by default. Set this to ```False``` if you do not want to install Nginx.<br/>
+```GEVENT_PORT``` is the port of the Odoo gevent (websocket) worker, 8072 by default. Odoo 19 no longer recognises the old ```longpolling_port``` option.<br/>
+```WORKER_COUNT``` is the number of Odoo workers written to the config file. Keep it above 0 when Nginx is used.<br/>
+```TIMEZONE``` is the server timezone, ```Asia/Hong_Kong``` by default.<br/>
 ```WEBSITE_NAME``` Set the website name here for nginx configuration<br/>
 ```ENABLE_SSL``` Set this to ```True``` to install [certbot](https://github.com/certbot/certbot) and configure nginx with https using a free Let's Encrypted certificate<br/>
 ```ADMIN_EMAIL``` Email is needed to register for Let's Encrypt registration. Replace the default placeholder with an email of your organisation.<br/>
@@ -37,6 +42,16 @@ sudo chmod +x odoo_install.sh
 ```
 sudo ./odoo_install.sh
 ```
+
+## What the script sets up
+- Odoo runs from a Python virtual environment in ```/odoo/venv```, so nothing is installed into the system Python.
+- Odoo is managed by systemd: ```sudo systemctl start|stop|restart odoo-server```.
+- The PostgreSQL role is created with ```CREATEDB``` but without ```SUPERUSER```, and the Odoo system user is not added to the sudo group.
+- wkhtmltopdf 0.12.6.1-3 (patched Qt) is installed from the [wkhtmltopdf packaging releases](https://github.com/wkhtmltopdf/packaging/releases/tag/0.12.6.1-3), for amd64 and arm64. There is no Ubuntu 24.04 build, the jammy build is used.
+- Chinese fonts are installed so that PDF reports render Chinese text.
+
+## Testing the script
+The ```test_install``` folder contains a Docker setup that runs the script in a clean Ubuntu 24.04 container. See [test_install/README.md](test_install/README.md).
 
 ## Where should I host Odoo?
 There are plenty of great services that offer good hosting. The script has been tested with a few major players such as [Google Cloud](https://cloud.google.com/), [Hetzner](https://www.hetzner.com/), [Amazon AWS](https://aws.amazon.com/) and [DigitalOcean](https://www.digitalocean.com/products/droplets/).
