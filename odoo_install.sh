@@ -288,11 +288,17 @@ else
     OE_ADDONS_PATH="${OE_HOME_EXT}/addons,${OE_HOME}/custom/addons"
 fi
 
-# Odoo must trust the X-Forwarded-* headers when it runs behind Nginx
+# Behind Nginx, Odoo must trust the X-Forwarded-* headers and only Nginx should reach it:
+# bind the HTTP (OE_PORT) and gevent (GEVENT_PORT) ports to the loopback interface, so they are
+# not reachable from the network. Otherwise anyone could bypass Nginx and, because of proxy_mode,
+# forge their client IP with a X-Forwarded-For header. Both ports share this one setting.
+# Without Nginx, Odoo has to listen on all interfaces to be reachable at all.
 if [ "$INSTALL_NGINX" = "True" ]; then
     OE_PROXY_MODE="True"
+    OE_HTTP_INTERFACE="127.0.0.1"
 else
     OE_PROXY_MODE="False"
+    OE_HTTP_INTERFACE="0.0.0.0"
 fi
 
 cat <<EOF | sudo tee /etc/${OE_CONFIG}.conf > /dev/null
@@ -304,6 +310,7 @@ admin_passwd = ${OE_SUPERADMIN}
 ; lets anyone enumerate database names. Left commented so the web database
 ; manager still works for creating the first database right after install.
 ; list_db = False
+http_interface = ${OE_HTTP_INTERFACE}
 http_port = ${OE_PORT}
 gevent_port = ${GEVENT_PORT}
 workers = ${WORKER_COUNT}
@@ -489,6 +496,7 @@ echo "-----------------------------------------------------------"
 echo "Done! The Odoo server is up and running. Specifications:"
 echo "Port: $OE_PORT"
 echo "Gevent (websocket) port: $GEVENT_PORT"
+echo "Odoo listens on: $OE_HTTP_INTERFACE (127.0.0.1 = only reachable through Nginx)"
 echo "User service: $OE_USER"
 echo "Configuraton file location: /etc/${OE_CONFIG}.conf"
 echo "Logfile location: /var/log/$OE_USER"

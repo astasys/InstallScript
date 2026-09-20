@@ -46,6 +46,7 @@ sudo ./odoo_install.sh
 ## What the script sets up
 - Odoo runs from a Python virtual environment in ```/odoo/venv```, so nothing is installed into the system Python.
 - Odoo is managed by systemd: ```sudo systemctl start|stop|restart odoo-server```.
+- With Nginx, Odoo only listens on ```127.0.0.1``` (```http_interface```), so ports 8069 and 8072 are not reachable from the network and all traffic goes through Nginx on 80/443. To reach Odoo directly for debugging, use an SSH tunnel: ```ssh -L 8069:127.0.0.1:8069 user@server```. Without Nginx, Odoo listens on all interfaces.
 - The PostgreSQL role is created with ```CREATEDB``` but without ```SUPERUSER```, and the Odoo system user is not added to the sudo group.
 - wkhtmltopdf 0.12.6.1-3 (patched Qt) is installed from the [wkhtmltopdf packaging releases](https://github.com/wkhtmltopdf/packaging/releases/tag/0.12.6.1-3), for amd64 and arm64. There is no Ubuntu 24.04 build, the jammy build is used.
 - Chinese fonts are installed so that PDF reports render Chinese text.
