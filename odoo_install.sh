@@ -18,7 +18,7 @@ OE_USER="odoo"
 OE_HOME="/$OE_USER"
 OE_HOME_EXT="/$OE_USER/${OE_USER}-server"
 # Python virtual environment used to run Odoo (keeps pip packages away from the system Python, PEP 668)
-OE_VENV="$OE_HOME/venv"
+OE_VENV="$OE_HOME/.venv"
 # Set to true if you want to install it, false if you don't need it or have it already installed.
 INSTALL_WKHTMLTOPDF="True"
 # Set the default Odoo port (you still have to use -c /etc/odoo-server.conf for example to use this.)

@@ -44,7 +44,7 @@ Everything else runs exactly as on a real server: packages, PostgreSQL role, vir
 ## Smoke Test After the Install
 Create a database and install the `base` module, then exit. This checks the virtualenv, the config file and the non-superuser PostgreSQL role in one go:
 ```bash
-docker compose exec odoo19 sudo -u odoo /odoo/venv/bin/python /odoo/odoo-server/odoo-bin \
+docker compose exec odoo19 sudo -u odoo /odoo/.venv/bin/python /odoo/odoo-server/odoo-bin \
   -c /etc/odoo-server.conf -d smoke -i base --stop-after-init --workers=0 --logfile=
 ```
 The run must end without a traceback and must not log `unknown option` warnings for the config file.
